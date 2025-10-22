@@ -25,11 +25,10 @@ func main() {
 		log.Fatal("No se pudo conectar a la base de datos")
 	}
 
-	// Fiber app
 	app := fiber.New()
 	app.Use(logger.New())
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: "http://localhost:5173", // Vite default dev URL - ajusta si es necesario
+		AllowOrigins: "http://localhost:5173",
 		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
 	}))
 

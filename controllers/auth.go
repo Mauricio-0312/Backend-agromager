@@ -14,6 +14,7 @@ type authRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	Name     string `json:"name,omitempty"`
+	Role     string `json:"role,omitempty"`
 }
 
 // SignUp crea usuario
@@ -37,7 +38,7 @@ func SignUp(c *fiber.Ctx) error {
 		Email:    email,
 		Password: hash,
 		Name:     body.Name,
-		Role:     "user",
+		Role:     body.Role,
 	}
 	if err := database.DB.Create(&user).Error; err != nil {
 		return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "usuario ya existe"})
