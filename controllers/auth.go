@@ -86,3 +86,9 @@ func AdminGetUsers(c *fiber.Ctx) error {
 	database.DB.Select("id, email, name, role, created_at").Find(&users)
 	return c.JSON(users)
 }
+
+func GetProyects(c *fiber.Ctx) error {
+	var proyects []models.Proyect
+	database.DB.Select("id, descripcion, created_at, cierre, habilitado").Find(&proyects)
+	return c.JSON(proyects)
+}
