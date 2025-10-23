@@ -10,7 +10,7 @@ type User struct {
 	Email    string `gorm:"uniqueIndex;not null"`
 	Password string `gorm:"not null"`
 	Name     string
-	Role     string `gorm:"default:user"` // "user" o "admin"
+	Role     string `gorm:"check:role_name,Role IN ('user', 'Admin', 'Analista de compras', 'Vendedor', 'Gerente')"`// "user" o "admin"
 }
 
 // HashPassword helper
