@@ -16,4 +16,5 @@ type Project struct {
 	StartDate   *time.Time     `json:"start_date"`
 	EndDate     *time.Time     `json:"end_date"`
 	Status      string         `gorm:"default:'activo'" json:"status"` // activo, cerrado, pausado
+	Users       []User         `gorm:"many2many:user_projects;" json:"users,omitempty"`
 }

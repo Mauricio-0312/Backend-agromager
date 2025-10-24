@@ -27,7 +27,12 @@ func GetUser(c *fiber.Ctx) error {
 	if err := database.DB.First(&user, id).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "usuario no encontrado"})
 	}
-	return c.JSON(user)
+
+	// fetch projects where this user is a participant
+	var projects []models.Project
+	database.DB.Model(&models.Project{}).Joins("JOIN user_projects up ON up.project_id = projects.id").Where("up.user_id = ?", id).Preload("Users").Find(&projects)
+
+	return c.JSON(fiber.Map{"user": user, "projects": projects})
 }
 
 type updateUserReq struct {
