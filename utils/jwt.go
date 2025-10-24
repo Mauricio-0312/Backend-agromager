@@ -10,26 +10,29 @@ import (
 var jwtKey = []byte(getJWTSecret())
 
 func getJWTSecret() string {
-	secret := os.Getenv("JWT_SECRET")
-	if secret == "" {
-		secret = "secret_jwt_key"
+	s := os.Getenv("JWT_SECRET")
+	if s == "" {
+		s = "supersecret_jwt_key"
 	}
-	return secret
+	return s
 }
 
 type Claims struct {
-	Email string `json:"email"`
-	Role  string `json:"role"`
+	UserID uint   `json:"user_id"`
+	Email  string `json:"email"`
+	Role   string `json:"role"`
 	jwt.RegisteredClaims
 }
 
-func GenerateToken(email, role string) (string, error) {
+func GenerateToken(userID uint, email, role string) (string, error) {
 	claims := &Claims{
-		Email: email,
-		Role:  role,
+		UserID: userID,
+		Email:  email,
+		Role:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			Subject:   email,
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

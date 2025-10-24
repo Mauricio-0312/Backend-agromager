@@ -2,6 +2,7 @@ package database
 
 import (
 	"log"
+	"os"
 
 	"agroproject/backend/models"
 	"gorm.io/driver/sqlite"
@@ -11,13 +12,18 @@ import (
 var DB *gorm.DB
 
 func Connect() *gorm.DB {
-	db, err := gorm.Open(sqlite.Open("agro.db"), &gorm.Config{})
+	dbPath := os.Getenv("DB_PATH")
+	if dbPath == "" {
+		dbPath = "agro.db"
+	}
+	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
 	if err != nil {
 		log.Println("Error conectando a sqlite:", err)
 		return nil
 	}
+
 	// Migraciones
-	err = db.AutoMigrate(&models.User{})
+	err = db.AutoMigrate(&models.User{}, &models.Project{}, &models.UserProject{})
 	if err != nil {
 		log.Println("AutoMigrate error:", err)
 	}
@@ -27,7 +33,6 @@ func Connect() *gorm.DB {
 	return db
 }
 
-// seedAdmin crea un admin si no existe (contraseña por defecto: admin123) — cambiar en producción
 func seedAdmin() {
 	var count int64
 	DB.Model(&models.User{}).Where("role = ?", "admin").Count(&count)
@@ -38,6 +43,7 @@ func seedAdmin() {
 			Password: pass,
 			Role:     "admin",
 			Name:     "Administrador",
+			Active:   true,
 		}
 		DB.Create(&admin)
 	}

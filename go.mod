@@ -5,6 +5,7 @@ go 1.21
 toolchain go1.24.3
 
 require (
+	github.com/gocarina/gocsv v0.0.0-20240520201108-78e41c74b4b1
 	github.com/gofiber/fiber/v2 v2.49.0
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	golang.org/x/crypto v0.17.0

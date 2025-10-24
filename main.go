@@ -14,15 +14,12 @@ import (
 )
 
 func main() {
-	// Load JWT secret from env or default
 	if os.Getenv("JWT_SECRET") == "" {
-		os.Setenv("JWT_SECRET", "supersecret_jwt_key_change_me")
+		os.Setenv("JWT_SECRET", "supersecret_jwt_key")
 	}
-
-	// Init DB
 	db := database.Connect()
 	if db == nil {
-		log.Fatal("No se pudo conectar a la base de datos")
+		log.Fatal("DB connection failed")
 	}
 
 	app := fiber.New()
@@ -32,23 +29,31 @@ func main() {
 		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
 	}))
 
-	// Routes
 	api := app.Group("/api")
-	api.Post("/signup", controllers.SignUp)
+	// auth
 	api.Post("/login", controllers.Login)
+	api.Post("/signup", controllers.SignUp)
 
-	// Protected routes
-	protected := api.Group("/")
-	protected.Use(middlewares.Protected()) // middleware que valida JWT
+	// protected routes
+	protected := api.Group("/", middlewares.RequireAuth())
+
+	// users (admin)
+	protected.Get("/users", controllers.ListUsers)                       
+	protected.Get("/users/:id", controllers.GetUser)
+	protected.Put("/users/:id", controllers.UpdateUser)
+	protected.Get("/csv/users", controllers.ExportUsersCSV)
+	protected.Delete("/users/:id", controllers.DeleteUser)
+	protected.Patch("/users/:id/password", controllers.ChangePassword)
 	protected.Get("/me", controllers.Me)
 
-	// Admin-only
-	admin := protected.Group("/")
-	admin.Use(middlewares.AdminOnly())
-	admin.Get("/admin/users", controllers.AdminGetUsers)
-	admin.Get("/admin/proyects", controllers.GetProyects)
+	// projects
+	protected.Post("/projects", controllers.CreateProject)
+	protected.Get("/projects", controllers.ListProjects)
+	protected.Get("/csv/projects", controllers.ExportProjectsCSV)
+	protected.Get("/projects/:id", controllers.GetProject)
+	protected.Put("/projects/:id", controllers.UpdateProject)
+	protected.Patch("/projects/:id/close", controllers.CloseProject)
 
-	// Start
-	log.Println("Backend escuchando en :8080")
+	log.Println("Backend listening on :8080")
 	log.Fatal(app.Listen(":8080"))
 }

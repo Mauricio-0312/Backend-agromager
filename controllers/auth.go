@@ -10,16 +10,15 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type authRequest struct {
+type signupReq struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
-	Name     string `json:"name,omitempty"`
-	Role     string `json:"role,omitempty"`
+	Name     string `json:"name"`
+	Role     string `json:"role"`
 }
 
-// SignUp crea usuario
 func SignUp(c *fiber.Ctx) error {
-	var body authRequest
+	var body signupReq
 	if err := c.BodyParser(&body); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "input inválido"})
 	}
@@ -27,28 +26,27 @@ func SignUp(c *fiber.Ctx) error {
 	if email == "" || body.Password == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "email y password requeridos"})
 	}
-
-	// Hash
-	hash, err := models.HashPassword(body.Password)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "error al hashear password"})
-	}
-
+	hash, _ := models.HashPassword(body.Password)
 	user := models.User{
 		Email:    email,
 		Password: hash,
 		Name:     body.Name,
 		Role:     body.Role,
+		Active:   true,
 	}
 	if err := database.DB.Create(&user).Error; err != nil {
 		return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "usuario ya existe"})
 	}
-	return c.JSON(fiber.Map{"message": "usuario creado"})
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"message": "usuario creado", "user": user})
 }
 
-// Login -> retorna token
+type loginReq struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 func Login(c *fiber.Ctx) error {
-	var body authRequest
+	var body loginReq
 	if err := c.BodyParser(&body); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "input inválido"})
 	}
@@ -62,33 +60,12 @@ func Login(c *fiber.Ctx) error {
 	if !models.CheckPassword(body.Password, user.Password) {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "credenciales inválidas"})
 	}
-
-	token, err := utils.GenerateToken(user.Email, user.Role)
+	if !user.Active {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "usuario inactivo"})
+	}
+	token, err := utils.GenerateToken(user.ID, user.Email, user.Role)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "no se pudo generar token"})
 	}
-
-	return c.JSON(fiber.Map{"token": token, "role": user.Role})
-}
-
-// Me devuelve info simple del user
-func Me(c *fiber.Ctx) error {
-	claims := c.Locals("claims").(*utils.Claims)
-	return c.JSON(fiber.Map{
-		"email": claims.Email,
-		"role":  claims.Role,
-	})
-}
-
-// AdminGetUsers lista usuarios (solo admin)
-func AdminGetUsers(c *fiber.Ctx) error {
-	var users []models.User
-	database.DB.Select("id, email, name, role, created_at").Find(&users)
-	return c.JSON(users)
-}
-
-func GetProyects(c *fiber.Ctx) error {
-	var proyects []models.Proyect
-	database.DB.Select("id, descripcion, created_at, cierre, habilitado").Find(&proyects)
-	return c.JSON(proyects)
+	return c.JSON(fiber.Map{"token": token, "role": user.Role, "user": fiber.Map{"id": user.ID, "email": user.Email, "name": user.Name, "role": user.Role}})
 }

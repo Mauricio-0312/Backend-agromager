@@ -8,8 +8,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// Protected middleware valida JWT y coloca claims en Locals
-func Protected() fiber.Handler {
+// RequireAuth verifica JWT y pone claims en locals
+func RequireAuth() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		auth := c.Get("Authorization")
 		if auth == "" {
@@ -25,16 +25,22 @@ func Protected() fiber.Handler {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "token inválido"})
 		}
 		c.Locals("claims", claims)
+		c.Locals("user_id", claims.UserID)
+		c.Locals("user_role", claims.Role)
 		return c.Next()
 	}
 }
 
-// AdminOnly middleware verifica que role == "admin"
-func AdminOnly() fiber.Handler {
+// RequireRole verifica rol mínimo
+func RequireRole(role string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		claims := c.Locals("claims").(*utils.Claims)
-		if claims.Role != "admin" {
-			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "recurso solo para administradores"})
+		r := c.Locals("user_role")
+		if r == nil {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "no role found"})
+		}
+		userRole := r.(string)
+		if userRole != role {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "acceso prohibido: se requiere rol " + role})
 		}
 		return c.Next()
 	}
