@@ -46,6 +46,7 @@ func main() {
 	admin := protected.Group("/")
 	admin.Use(middlewares.AdminOnly())
 	admin.Get("/admin/users", controllers.AdminGetUsers)
+	admin.Get("/admin/proyects", controllers.GetProyects)
 
 	// Start
 	log.Println("Backend escuchando en :8080")
