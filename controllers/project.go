@@ -80,14 +80,14 @@ func ListProjects(c *fiber.Ctx) error {
 		db = db.Joins("JOIN user_projects up ON up.project_id = projects.id").Where("up.user_id = ?", uid)
 	}
 
-	db.Preload("Users").Find(&projects)
+	db.Preload("Users").Preload("Activities").Preload("Activities.Equipos").Preload("Activities.LaborAgronomica").Preload("Activities.Encargado").Find(&projects)
 	return c.JSON(projects)
 }
 
 func GetProject(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var p models.Project
-	if err := database.DB.Preload("Users").First(&p, id).Error; err != nil {
+	if err := database.DB.Preload("Users").Preload("Activities").Preload("Activities.Equipos").Preload("Activities.LaborAgronomica").Preload("Activities.Encargado").First(&p, id).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "project not found"})
 	}
 	return c.JSON(p)

@@ -23,7 +23,7 @@ func Connect() *gorm.DB {
 	}
 
 	// Migraciones
-	err = db.AutoMigrate(&models.User{}, &models.Project{}, &models.UserProject{})
+	err = db.AutoMigrate(&models.User{}, &models.Project{}, &models.UserProject{}, &models.LaborAgronomica{}, &models.EquipoImplemento{}, &models.ActividadAgricola{})
 	if err != nil {
 		log.Println("AutoMigrate error:", err)
 	}

@@ -54,6 +54,27 @@ func main() {
 	protected.Put("/projects/:id", controllers.UpdateProject)
 	protected.Patch("/projects/:id/close", controllers.CloseProject)
 
+	// Labores Agronómicas
+	protected.Post("/labores", controllers.CreateLabor)
+	protected.Get("/labores", controllers.ListLabores)
+	protected.Get("/labores/:id", controllers.GetLabor)
+	protected.Put("/labores/:id", controllers.UpdateLabor)
+	protected.Delete("/labores/:id", controllers.DeleteLabor)
+
+	// Equipos e Implementos
+	protected.Post("/equipos", controllers.CreateEquipo)
+	protected.Get("/equipos", controllers.ListEquipos)
+	protected.Get("/equipos/:id", controllers.GetEquipo)
+	protected.Put("/equipos/:id", controllers.UpdateEquipo)
+	protected.Delete("/equipos/:id", controllers.DeleteEquipo)
+
+	// Actividades Agrícolas
+	protected.Post("/activities", controllers.CreateActividad)
+	protected.Get("/activities", controllers.ListActividades)
+	protected.Get("/activities/:id", controllers.GetActividad)
+	protected.Put("/activities/:id", controllers.UpdateActividad)
+	protected.Delete("/activities/:id", controllers.DeleteActividad)
+
 	log.Println("Backend listening on :8080")
 	log.Fatal(app.Listen(":8080"))
 }
