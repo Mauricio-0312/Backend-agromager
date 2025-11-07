@@ -17,7 +17,7 @@ import (
 // List users (admin)
 func ListUsers(c *fiber.Ctx) error {
 	var users []models.User
-	database.DB.Select("id, email, name, role, active, created_at").Find(&users)
+	database.DB.Select("id, email, name, dni, role, active, created_at").Find(&users)
 	return c.JSON(users)
 }
 
@@ -39,6 +39,7 @@ type updateUserReq struct {
 	Name  string `json:"name"`
 	Role  string `json:"role"`
 	Active *bool `json:"active"`
+	Dni   string `json:"dni"`
 }
 
 func UpdateUser(c *fiber.Ctx) error {
@@ -56,6 +57,9 @@ func UpdateUser(c *fiber.Ctx) error {
 	}
 	if body.Role != "" {
 		user.Role = body.Role
+	}
+	if body.Dni != "" {
+		user.Dni = body.Dni
 	}
 	if body.Active != nil {
 		user.Active = *body.Active
@@ -80,12 +84,13 @@ func ExportUsersCSV(c *fiber.Ctx) error {
 	var buf bytes.Buffer
 	writer := csv.NewWriter(&buf)
 	// header
-	writer.Write([]string{"id", "email", "name", "role", "active", "created_at"})
+	writer.Write([]string{"id", "email", "name", "dni", "role", "active", "created_at"})
 	for _, u := range users {
 		created := u.CreatedAt.Format(time.RFC3339)
 		writer.Write([]string{
 			strconv.FormatUint(uint64(u.ID), 10),
 			u.Email,
+			u.Dni,
 			u.Name,
 			u.Role,
 			strconv.FormatBool(u.Active),

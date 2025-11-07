@@ -15,6 +15,7 @@ type User struct {
 	Email     string         `gorm:"uniqueIndex;not null" json:"email"`
 	Password  string         `gorm:"not null" json:"-"`
 	Name      string         `json:"name"`
+	Dni       string         `json:"dni"`
 	Role      string         `gorm:"default:user" json:"role"` // admin, analista, vendedor, user
 	Active    bool           `gorm:"default:true" json:"active"`
 }

@@ -15,6 +15,7 @@ type signupReq struct {
 	Password string `json:"password"`
 	Name     string `json:"name"`
 	Role     string `json:"role"`
+	Dni      string `json:"dni"`
 }
 
 func SignUp(c *fiber.Ctx) error {
@@ -31,6 +32,7 @@ func SignUp(c *fiber.Ctx) error {
 		Email:    email,
 		Password: hash,
 		Name:     body.Name,
+		Dni:      body.Dni,
 		Role:     body.Role,
 		Active:   true,
 	}
@@ -67,5 +69,5 @@ func Login(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "no se pudo generar token"})
 	}
-	return c.JSON(fiber.Map{"token": token, "role": user.Role, "user": fiber.Map{"id": user.ID, "email": user.Email, "name": user.Name, "role": user.Role}})
+	return c.JSON(fiber.Map{"token": token, "role": user.Role, "user": fiber.Map{"id": user.ID, "email": user.Email, "name": user.Name, "role": user.Role, "dni": user.Dni}})
 }
