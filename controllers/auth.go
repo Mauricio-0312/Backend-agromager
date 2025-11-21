@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"strings"
 
 	"agroproject/backend/database"
@@ -39,6 +40,8 @@ func SignUp(c *fiber.Ctx) error {
 	if err := database.DB.Create(&user).Error; err != nil {
 		return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "usuario ya existe"})
 	}
+	// Log signup event and provide user ID so logger embeds it even if not authenticated
+	LogAction(c, "Usuario", "Registro", fmt.Sprintf("created user id=%d email=%s role=%s", user.ID, user.Email, user.Role), user.ID)
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"message": "usuario creado", "user": user})
 }
 
@@ -69,5 +72,7 @@ func Login(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "no se pudo generar token"})
 	}
+	// Log login event, pass user ID so it is embedded
+	LogAction(c, "Usuario", "Iniciar Sesión", fmt.Sprintf("user_id=%d email=%s", user.ID, user.Email), user.ID)
 	return c.JSON(fiber.Map{"token": token, "role": user.Role, "user": fiber.Map{"id": user.ID, "email": user.Email, "name": user.Name, "role": user.Role, "dni": user.Dni}})
 }

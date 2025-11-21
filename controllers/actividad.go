@@ -3,6 +3,7 @@ package controllers
 import (
 	"agroproject/backend/database"
 	"agroproject/backend/models"
+	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -48,6 +49,7 @@ func CreateActividad(c *fiber.Ctx) error {
 	}
 	// preload relations
 	database.DB.Preload("Equipos").Preload("LaborAgronomica").Preload("Encargado").First(&a, a.ID)
+	LogAction(c, "Actividad", "Crear", "created activity id="+strconv.FormatUint(uint64(a.ID), 10))
 	return c.JSON(a)
 }
 
@@ -63,6 +65,7 @@ func ListActividades(c *fiber.Ctx) error {
 		db = db.Where("project_id = ?", pid)
 	}
 	db.Preload("Equipos").Preload("LaborAgronomica").Preload("Encargado").Find(&acts)
+	LogAction(c, "Actividad", "Listar", "list activities")
 	return c.JSON(acts)
 }
 
@@ -72,6 +75,7 @@ func GetActividad(c *fiber.Ctx) error {
 	if err := database.DB.Preload("Equipos").Preload("LaborAgronomica").Preload("Encargado").First(&a, id).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "not found"})
 	}
+	LogAction(c, "Actividad", "Obtener", "get activity id="+id)
 	return c.JSON(a)
 }
 
@@ -113,6 +117,7 @@ func UpdateActividad(c *fiber.Ctx) error {
 		database.DB.Model(&a).Association("Equipos").Replace(equipos)
 	}
 	database.DB.Preload("Equipos").Preload("LaborAgronomica").Preload("Encargado").First(&a, a.ID)
+	LogAction(c, "Actividad", "Actualizar", "updated activity id="+id)
 	return c.JSON(a)
 }
 
@@ -123,5 +128,6 @@ func DeleteActividad(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "not found"})
 	}
 	database.DB.Delete(&a)
+	LogAction(c, "Actividad", "Eliminar", "deleted activity id="+id)
 	return c.SendStatus(fiber.StatusNoContent)
 }

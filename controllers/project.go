@@ -47,6 +47,7 @@ func CreateProject(c *fiber.Ctx) error {
 			database.DB.Model(&p).Association("Users").Replace(users)
 		}
 	}
+	LogAction(c, "Proyecto", "Crear", "created project id="+strconv.FormatUint(uint64(p.ID), 10))
 	return c.JSON(p)
 }
 
@@ -81,6 +82,7 @@ func ListProjects(c *fiber.Ctx) error {
 	}
 
 	db.Preload("Users").Preload("Activities").Preload("Activities.Equipos").Preload("Activities.LaborAgronomica").Preload("Activities.Encargado").Find(&projects)
+	LogAction(c, "Proyecto", "Listar", "list projects")
 	return c.JSON(projects)
 }
 
@@ -90,6 +92,7 @@ func GetProject(c *fiber.Ctx) error {
 	if err := database.DB.Preload("Users").Preload("Activities").Preload("Activities.Equipos").Preload("Activities.LaborAgronomica").Preload("Activities.Encargado").First(&p, id).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "project not found"})
 	}
+	LogAction(c, "Proyecto", "Obtener", "get project id="+id)
 	return c.JSON(p)
 }
 
@@ -125,6 +128,7 @@ func UpdateProject(c *fiber.Ctx) error {
 		database.DB.Find(&users, body.UserIDs)
 		database.DB.Model(&p).Association("Users").Replace(users)
 	}
+	LogAction(c, "Proyecto", "Actualizar", "updated project id="+id)
 	return c.JSON(p)
 }
 
@@ -138,6 +142,7 @@ func CloseProject(c *fiber.Ctx) error {
 	now := time.Now()
 	p.EndDate = &now
 	database.DB.Save(&p)
+	LogAction(c, "Proyecto", "Cerrar", "closed project id="+id)
 	return c.JSON(p)
 }
 
@@ -192,6 +197,7 @@ func ExportProjectsCSV(c *fiber.Ctx) error {
 		})
 	}
 	writer.Flush()
+	LogAction(c, "Proyecto", "Exportar CSV", "exported projects csv")
 	c.Set("Content-Type", "text/csv")
 	c.Set("Content-Disposition", "attachment; filename=projects.csv")
 	return c.SendStream(&buf)

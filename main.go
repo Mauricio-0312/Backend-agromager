@@ -75,6 +75,20 @@ func main() {
 	protected.Put("/activities/:id", controllers.UpdateActividad)
 	protected.Delete("/activities/:id", controllers.DeleteActividad)
 
+	// Units of Measure
+	protected.Post("/units", controllers.CreateUnit)
+	protected.Get("/units", controllers.ListUnits)
+	protected.Get("/units/:id", controllers.GetUnit)
+	protected.Put("/units/:id", controllers.UpdateUnit)
+	protected.Delete("/units/:id", controllers.DeleteUnit)
+
+	// Logger endpoints (admin only for listing/deleting)
+	protected.Post("/logs", controllers.CreateLog)
+	protected.Get("/logs", controllers.ListLogs)
+	protected.Get("/logs/:id", controllers.GetLog)
+	protected.Delete("/logs/:id", controllers.DeleteLog)
+	protected.Get("/logs/count", controllers.CountLogs)
+
 	log.Println("Backend listening on :8080")
 	log.Fatal(app.Listen(":8080"))
 }

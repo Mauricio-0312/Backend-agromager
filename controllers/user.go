@@ -11,13 +11,13 @@ import (
 	"agroproject/backend/utils"
 
 	"github.com/gofiber/fiber/v2"
-	
 )
 
 // List users (admin)
 func ListUsers(c *fiber.Ctx) error {
 	var users []models.User
 	database.DB.Select("id, email, name, dni, role, active, created_at").Find(&users)
+	LogAction(c, "Usuario", "Listar", "list users")
 	return c.JSON(users)
 }
 
@@ -32,14 +32,15 @@ func GetUser(c *fiber.Ctx) error {
 	var projects []models.Project
 	database.DB.Model(&models.Project{}).Joins("JOIN user_projects up ON up.project_id = projects.id").Where("up.user_id = ?", id).Preload("Users").Find(&projects)
 
+	LogAction(c, "Usuario", "Obtener", "get user id="+id)
 	return c.JSON(fiber.Map{"user": user, "projects": projects})
 }
 
 type updateUserReq struct {
-	Name  string `json:"name"`
-	Role  string `json:"role"`
-	Active *bool `json:"active"`
-	Dni   string `json:"dni"`
+	Name   string `json:"name"`
+	Role   string `json:"role"`
+	Active *bool  `json:"active"`
+	Dni    string `json:"dni"`
 }
 
 func UpdateUser(c *fiber.Ctx) error {
@@ -65,6 +66,7 @@ func UpdateUser(c *fiber.Ctx) error {
 		user.Active = *body.Active
 	}
 	database.DB.Save(&user)
+	LogAction(c, "Usuario", "Actualizar", "updated user id="+id)
 	return c.JSON(user)
 }
 
@@ -73,6 +75,7 @@ func DeleteUser(c *fiber.Ctx) error {
 	if err := database.DB.Delete(&models.User{}, id).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "no se pudo eliminar usuario"})
 	}
+	LogAction(c, "User", "Eliminar", "deleted user id="+id)
 	return c.JSON(fiber.Map{"message": "usuario eliminado"})
 }
 
@@ -98,6 +101,7 @@ func ExportUsersCSV(c *fiber.Ctx) error {
 		})
 	}
 	writer.Flush()
+	LogAction(c, "Usuario", "Exportar CSV", "exported users csv")
 
 	c.Set("Content-Type", "text/csv")
 	c.Set("Content-Disposition", "attachment; filename=users.csv")
@@ -126,6 +130,7 @@ func ChangePassword(c *fiber.Ctx) error {
 	hash, _ := models.HashPassword(req.NewPassword)
 	user.Password = hash
 	database.DB.Save(&user)
+	LogAction(c, "Usuario", "Cambiar Contraseña", "changed password for user id="+id)
 	return c.JSON(fiber.Map{"message": "password updated"})
 }
 

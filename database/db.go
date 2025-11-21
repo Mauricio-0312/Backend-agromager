@@ -23,13 +23,14 @@ func Connect() *gorm.DB {
 	}
 
 	// Migraciones
-	err = db.AutoMigrate(&models.User{}, &models.Project{}, &models.UserProject{}, &models.LaborAgronomica{}, &models.EquipoImplemento{}, &models.ActividadAgricola{})
+	err = db.AutoMigrate(&models.User{}, &models.Project{}, &models.UserProject{}, &models.LaborAgronomica{}, &models.EquipoImplemento{}, &models.ActividadAgricola{}, &models.Logger{}, &models.UnitOfMeasure{})
 	if err != nil {
 		log.Println("AutoMigrate error:", err)
 	}
 
 	DB = db
 	seedAdmin()
+	seedUnits()
 	return db
 }
 
@@ -46,5 +47,19 @@ func seedAdmin() {
 			Active:   true,
 		}
 		DB.Create(&admin)
+	}
+}
+
+func seedUnits() {
+	var count int64
+	DB.Model(&models.UnitOfMeasure{}).Count(&count)
+	if count == 0 {
+		units := []models.UnitOfMeasure{
+			{Dimension: "8", Unit: "Pulgadas"},
+			{Dimension: "6", Unit: "Pulgadas"},
+		}
+		for _, u := range units {
+			DB.Create(&u)
+		}
 	}
 }
