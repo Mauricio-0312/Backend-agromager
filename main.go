@@ -89,6 +89,25 @@ func main() {
 	protected.Delete("/logs/:id", controllers.DeleteLog)
 	protected.Get("/logs/count", controllers.CountLogs)
 
+	// Plans and costs
+	protected.Post("/projects/:id/planes-accion", controllers.CreatePlanAccion)
+	protected.Get("/projects/:id/planes-accion", controllers.ListPlanesPorProyecto)
+	protected.Get("/planes-accion/:id", controllers.GetPlanAccion)
+	protected.Put("/planes-accion/:id", controllers.UpdatePlanAccion)
+	protected.Delete("/planes-accion/:id", controllers.DeletePlanAccion)
+
+	protected.Post("/planes-accion/:id/costos-humanos", controllers.CreateCostoHumano)
+	protected.Get("/planes-accion/:id/costos-humanos", controllers.ListCostosHumanos)
+	protected.Get("/costos-humanos/:id", controllers.GetCostoHumano)
+	protected.Put("/costos-humanos/:id", controllers.UpdateCostoHumano)
+	protected.Delete("/costos-humanos/:id", controllers.DeleteCostoHumano)
+
+	protected.Post("/planes-accion/:id/costos-materiales", controllers.CreateCostoMaterial)
+	protected.Get("/planes-accion/:id/costos-materiales", controllers.ListCostosMateriales)
+	protected.Get("/costos-materiales/:id", controllers.GetCostoMaterial)
+	protected.Put("/costos-materiales/:id", controllers.UpdateCostoMaterial)
+	protected.Delete("/costos-materiales/:id", controllers.DeleteCostoMaterial)
+
 	log.Println("Backend listening on :8080")
 	log.Fatal(app.Listen(":8080"))
 }
